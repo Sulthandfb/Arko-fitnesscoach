@@ -24,3 +24,5 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
+https://github.com/AvdLee/SwiftUI-Agent-Skill.git 
