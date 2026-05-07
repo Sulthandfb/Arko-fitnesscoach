@@ -1,21 +1,29 @@
-//
-//  ContentView.swift
-//  arko-fitnesscoach
-//
-//  Created by 20 on 2026/5/7.
-//
-
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
+        TabView {
+            HomeView()
+                .tabItem {
+                    Label("Home", systemImage: "house.fill")
+                }
+
+            WorkoutsView()
+                .tabItem {
+                    Label("Workouts", systemImage: "figure.run")
+                }
+
+            FormCheckView()
+                .tabItem {
+                    Label("Form", systemImage: "camera.fill")
+                }
+
+            ProfileView()
+                .tabItem {
+                    Label("Profile", systemImage: "person.circle.fill")
+                }
         }
-        .padding()
+        .tint(.orange)
     }
 }
 
@@ -24,5 +32,3 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
-
-https://github.com/AvdLee/SwiftUI-Agent-Skill.git 

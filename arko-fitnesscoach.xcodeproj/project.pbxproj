@@ -14,6 +14,10 @@
 		EB6B391B2FAC24A4007E1972 /* arko_fitnesscoachTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6B391A2FAC24A4007E1972 /* arko_fitnesscoachTests.swift */; };
 		EB6B39252FAC24A4007E1972 /* arko_fitnesscoachUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6B39242FAC24A4007E1972 /* arko_fitnesscoachUITests.swift */; };
 		EB6B39272FAC24A4007E1972 /* arko_fitnesscoachUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6B39262FAC24A4007E1972 /* arko_fitnesscoachUITestsLaunchTests.swift */; };
+		EB6B39372FAC3686007E1972 /* FormCheckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6B39332FAC3686007E1972 /* FormCheckView.swift */; };
+		EB6B39382FAC3686007E1972 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6B39342FAC3686007E1972 /* ProfileView.swift */; };
+		EB6B39392FAC3686007E1972 /* WorkoutsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6B39352FAC3686007E1972 /* WorkoutsView.swift */; };
+		EB6B393A2FAC3686007E1972 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EB6B39362FAC3686007E1972 /* HomeView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -44,6 +48,10 @@
 		EB6B39202FAC24A4007E1972 /* arko-fitnesscoachUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = "arko-fitnesscoachUITests.xctest"; sourceTree = BUILT_PRODUCTS_DIR; };
 		EB6B39242FAC24A4007E1972 /* arko_fitnesscoachUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = arko_fitnesscoachUITests.swift; sourceTree = "<group>"; };
 		EB6B39262FAC24A4007E1972 /* arko_fitnesscoachUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = arko_fitnesscoachUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		EB6B39332FAC3686007E1972 /* FormCheckView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FormCheckView.swift; sourceTree = "<group>"; };
+		EB6B39342FAC3686007E1972 /* ProfileView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		EB6B39352FAC3686007E1972 /* WorkoutsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WorkoutsView.swift; sourceTree = "<group>"; };
+		EB6B39362FAC3686007E1972 /* HomeView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -96,6 +104,10 @@
 			children = (
 				EB6B39092FAC24A0007E1972 /* arko_fitnesscoachApp.swift */,
 				EB6B390B2FAC24A0007E1972 /* ContentView.swift */,
+				EB6B39332FAC3686007E1972 /* FormCheckView.swift */,
+				EB6B39362FAC3686007E1972 /* HomeView.swift */,
+				EB6B39342FAC3686007E1972 /* ProfileView.swift */,
+				EB6B39352FAC3686007E1972 /* WorkoutsView.swift */,
 				EB6B390D2FAC24A4007E1972 /* Assets.xcassets */,
 				EB6B390F2FAC24A4007E1972 /* Preview Content */,
 			);
@@ -257,7 +269,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				EB6B39382FAC3686007E1972 /* ProfileView.swift in Sources */,
+				EB6B39392FAC3686007E1972 /* WorkoutsView.swift in Sources */,
 				EB6B390C2FAC24A0007E1972 /* ContentView.swift in Sources */,
+				EB6B393A2FAC3686007E1972 /* HomeView.swift in Sources */,
+				EB6B39372FAC3686007E1972 /* FormCheckView.swift in Sources */,
 				EB6B390A2FAC24A0007E1972 /* arko_fitnesscoachApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

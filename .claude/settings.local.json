@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude skill *)",
+      "Read(//usr/local/bin/**)",
+      "Read(//Users/a20/.npm/**)",
+      "Bash(npx claude *)",
+      "Read(//Users/a20/.claude/**)",
+      "Read(//usr/**)",
+      "Read(//Users/a20/Library/**)",
+      "Read(//Applications/**)",
+      "Bash(mkdir -p ~/.claude/skills)",
+      "Bash(git clone *)",
+      "Bash(npx skills *)"
+    ]
+  }
+}

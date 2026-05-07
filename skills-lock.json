@@ -1,0 +1,47 @@
+{
+  "version": 1,
+  "skills": {
+    "core-data-expert": {
+      "source": "avdlee/core-data-agent-skill",
+      "sourceType": "github",
+      "skillPath": "core-data-expert/SKILL.md",
+      "computedHash": "b8d2829005b1f2fefbaa8af2ea7d7d64e2fbeca2f2172033176ad0780edc3970"
+    },
+    "healthkit": {
+      "source": "dpearson2699/swift-ios-skills",
+      "sourceType": "github",
+      "skillPath": "skills/healthkit/SKILL.md",
+      "computedHash": "d6688c517d30791f84a4b851271358f7c7c2a8c890c98ae90c261ac1c6f75ea5"
+    },
+    "lottie": {
+      "source": "heygen-com/hyperframes",
+      "sourceType": "github",
+      "skillPath": "skills/lottie/SKILL.md",
+      "computedHash": "42174a1de29225618166626ed113bfd311a6b53083ddd514ab50991816f77b19"
+    },
+    "swift-concurrency": {
+      "source": "avdlee/swift-concurrency-agent-skill",
+      "sourceType": "github",
+      "skillPath": "swift-concurrency/SKILL.md",
+      "computedHash": "64067648af92d2c24b8df033e9f1b19ab36364fbee015a53755d7e74a5711b60"
+    },
+    "swift-testing-expert": {
+      "source": "avdlee/swift-testing-agent-skill",
+      "sourceType": "github",
+      "skillPath": "swift-testing-expert/SKILL.md",
+      "computedHash": "ee2a73c7148264cb7e0a0819d3063225541e57162353d97707d9fab830d27ba6"
+    },
+    "swiftui-expert-skill": {
+      "source": "AvdLee/SwiftUI-Agent-Skill",
+      "sourceType": "github",
+      "skillPath": "swiftui-expert-skill/SKILL.md",
+      "computedHash": "9db9a694b7354dea993bff22d038bc39e4d64b28a9c598b84793f2e1153db1cb"
+    },
+    "vision-framework": {
+      "source": "dpearson2699/swift-ios-skills",
+      "sourceType": "github",
+      "skillPath": "skills/vision-framework/SKILL.md",
+      "computedHash": "75ef3dc71e6b65a5c3df0b817b225e4403ffe3a29396f7b42f1f3115f24e3b43"
+    }
+  }
+}
