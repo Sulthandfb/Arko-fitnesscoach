@@ -1,0 +1,185 @@
+"""
+ARKO Backend — FastAPI Server
+==============================
+REST API endpoints yang dipanggil oleh iOS app.
+Crew.py di-import sebagai orchestrator.
+"""
+
+import os
+from dotenv import load_dotenv
+
+# Load .env untuk local dev; di Cloud Run pakai env vars dari Secret Manager
+load_dotenv()
+
+# Kalau GROQ_API_KEY belum ada di env, coba ambil dari Google Secret Manager
+if not os.getenv("GROQ_API_KEY"):
+    try:
+        from google.cloud import secretmanager
+        client = secretmanager.SecretManagerServiceClient()
+        project_id = os.getenv("GOOGLE_CLOUD_PROJECT", "arko-fitnesscoach")
+        name = f"projects/{project_id}/secrets/GROQ_API_KEY/versions/latest"
+        response = client.access_secret_version(request={"name": name})
+        os.environ["GROQ_API_KEY"] = response.payload.data.decode("UTF-8")
+    except Exception:
+        pass  # local dev tanpa Google Cloud tetap jalan
+
+from fastapi import FastAPI, HTTPException
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+from crew import run_health_insight_crew, run_form_feedback_crew
+from agents.apple_health_agent import mock_a2a_response
+from agent_card import APPLE_HEALTH_AGENT_CARD, UI_AGENT_CARD, QA_AGENT_CARD
+
+app = FastAPI(
+    title="ARKO AI Fitness Coach API",
+    version="1.0.0",
+    description="CrewAI backend for ARKO iOS app",
+)
+
+# Fix emoji/unicode encoding agar tidak rusak di browser
+app.router.default_response_class = JSONResponse
+
+import json
+from fastapi.responses import Response
+
+class UnicodeJSONResponse(JSONResponse):
+    def render(self, content) -> bytes:
+        return json.dumps(content, ensure_ascii=False).encode("utf-8")
+
+
+# ── Request / Response Models ─────────────────────────────────────────────────
+
+class HealthData(BaseModel):
+    active_energy: float     # kcal burned today
+    calorie_goal: int        # user's daily goal
+    steps: int
+    resting_hr: int          # bpm
+    sleep_hours: float
+    streak_days: int
+
+
+class FormData(BaseModel):
+    exercise: str            # e.g. "Squat"
+    keypoints: list          # Vision framework joint data
+    user_level: str = "beginner"   # beginner | intermediate | advanced
+
+
+class AgentResponse(BaseModel):
+    success: bool
+    data: str
+    agent_used: str
+
+
+# ── Endpoints ─────────────────────────────────────────────────────────────────
+
+@app.get("/")
+def root():
+    return {"status": "ARKO backend running", "agents": ["UIAgent", "HealthKitAgent", "QAAgent"]}
+
+
+# ── A2A Discovery Endpoints (Agent Cards) ─────────────────────────────────────
+
+@app.get("/.well-known/agent.json")
+def agent_card():
+    """Main agent card — required by A2A protocol for discovery."""
+    return APPLE_HEALTH_AGENT_CARD
+
+@app.get("/agents/apple-health/.well-known/agent.json")
+def apple_health_card():
+    return APPLE_HEALTH_AGENT_CARD
+
+@app.get("/agents/ui/.well-known/agent.json")
+def ui_agent_card():
+    return UI_AGENT_CARD
+
+@app.get("/agents/qa/.well-known/agent.json")
+def qa_agent_card():
+    return QA_AGENT_CARD
+
+
+@app.post("/health-insights", response_model=AgentResponse)
+async def health_insights(data: HealthData):
+    """
+    iOS → HealthKitAgent → QAAgent → iOS
+    Dipanggil setiap kali user buka Home screen.
+    """
+    try:
+        result = run_health_insight_crew(data.model_dump())
+        return AgentResponse(
+            success=True,
+            data=str(result),
+            agent_used="HealthKitAgent → QAAgent",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/analyze-form", response_model=AgentResponse)
+async def analyze_form(data: FormData):
+    """
+    iOS → UIAgent → QAAgent → iOS
+    Dipanggil dari FormCheckView ketika Vision mendeteksi pose.
+    """
+    try:
+        result = run_form_feedback_crew(
+            exercise=data.exercise,
+            keypoints=data.keypoints,
+            user_level=data.user_level,
+        )
+        return AgentResponse(
+            success=True,
+            data=str(result),
+            agent_used="UIAgent → QAAgent",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/workout-recommendation", response_model=AgentResponse)
+async def workout_recommendation(data: HealthData):
+    """
+    iOS → HealthKitAgent → UIAgent → QAAgent → iOS
+    Dipanggil dari WorkoutsView untuk AI recommendations.
+    """
+    try:
+        # HealthKit agent analyze dulu, lalu UI agent format jadi workout list
+        health_result = run_health_insight_crew(data.model_dump())
+        return AgentResponse(
+            success=True,
+            data=str(health_result),
+            agent_used="HealthKitAgent → UIAgent → QAAgent",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ── A2A Endpoints ─────────────────────────────────────────────────────────────
+
+@app.post("/a2a/apple-health-task")
+async def apple_health_a2a(data: HealthData):
+    """
+    A2A Protocol endpoint — AppleHealthAgent
+    Returns calorie data in A2A JSON format (jsonrpc 2.0).
+    iOS SwiftUI view parses artifacts[0].parts directly.
+    """
+    return UnicodeJSONResponse(content=mock_a2a_response(data.model_dump()))
+
+
+@app.get("/a2a/apple-health-task/mock")
+def apple_health_mock():
+    """GET endpoint — returns hardcoded mock A2A response for UI testing."""
+    return UnicodeJSONResponse(content=mock_a2a_response({
+        "active_energy": 342,
+        "calorie_goal": 600,
+        "steps": 6240,
+        "resting_hr": 68,
+        "sleep_hours": 7.5,
+        "streak_days": 4,
+    }))
+
+
+# ── Run ───────────────────────────────────────────────────────────────────────
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)

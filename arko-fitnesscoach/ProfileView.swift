@@ -1,76 +1,103 @@
 import SwiftUI
 
 struct ProfileView: View {
-    // Mock user data — will come from Firebase Auth + SwiftData
-    @State private var calorieGoal: Double = 600
-    @State private var fitnessLevel = FitnessLevel.intermediate
+    @State private var profile = UserProfile.load()
     @State private var notificationsEnabled = true
 
     var body: some View {
-        NavigationStack {
-            List {
-                userInfoSection
-                goalsSection
-                settingsSection
-                aboutSection
+        ZStack {
+            Color.arkoBg.ignoresSafeArea()
+
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 16) {
+                    avatarHeader
+                    goalsCard
+                    settingsCard
+                    aboutCard
+                    Spacer(minLength: 100)
+                }
+                .padding(.horizontal, 20)
+                .padding(.top, 8)
             }
-            .listStyle(.insetGrouped)
-            .navigationTitle("Profile")
         }
     }
 
-    // MARK: - User Info
+    // MARK: - Avatar Header
 
-    private var userInfoSection: some View {
-        Section {
-            HStack(spacing: 16) {
-                ZStack {
-                    Circle()
-                        .fill(LinearGradient(
-                            colors: [.orange, .red],
-                            startPoint: .topLeading,
-                            endPoint: .bottomTrailing
-                        ))
-                        .frame(width: 60, height: 60)
-                    Text("A")
-                        .font(.system(size: 26, weight: .bold))
-                        .foregroundStyle(.white)
-                }
-
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Athlete")
-                        .font(.headline)
-                    Text("ARKO Member")
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-
-                Spacer()
-
-                Image(systemName: "chevron.right")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
+    private var avatarHeader: some View {
+        VStack(spacing: 12) {
+            ZStack {
+                Circle()
+                    .fill(
+                        LinearGradient(
+                            colors: [Color.arkoTeal, .blue.opacity(0.8)],
+                            startPoint: .topLeading, endPoint: .bottomTrailing
+                        )
+                    )
+                    .frame(width: 80, height: 80)
+                Text("A")
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundStyle(.white)
             }
-            .padding(.vertical, 6)
+
+            Text(profile.name)
+                .font(.title3.weight(.bold))
+            Text("ARKO Member")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+
+            HStack(spacing: 24) {
+                statBadge(value: "\(profile.calorieGoal)", label: "kcal Goal")
+                Divider().frame(height: 30)
+                statBadge(value: profile.fitnessLevel.capitalized, label: "Level")
+                Divider().frame(height: 30)
+                statBadge(value: "4", label: "Day Streak")
+            }
+            .arkoCard(padding: 16)
         }
+        .frame(maxWidth: .infinity)
+        .arkoCard(padding: 20)
     }
 
-    // MARK: - Goals
+    private func statBadge(value: String, label: String) -> some View {
+        VStack(spacing: 3) {
+            Text(value)
+                .font(.subheadline.weight(.bold))
+                .foregroundStyle(Color.arkoTeal)
+            Text(label)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+    }
 
-    private var goalsSection: some View {
-        Section {
-            VStack(alignment: .leading, spacing: 12) {
+    // MARK: - Goals Card
+
+    private var goalsCard: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Label("Goals", systemImage: "target")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.arkoTeal)
+
+            VStack(alignment: .leading, spacing: 8) {
                 HStack {
                     Label("Daily Calorie Goal", systemImage: "flame.fill")
-                        .foregroundStyle(.orange)
+                        .font(.subheadline)
+                        .foregroundStyle(.primary)
                     Spacer()
-                    Text("\(Int(calorieGoal)) kcal")
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(.orange)
+                    Text("\(Int(profile.calorieGoal)) kcal")
+                        .font(.subheadline.weight(.bold))
+                        .foregroundStyle(Color.arkoTeal)
                 }
 
-                Slider(value: $calorieGoal, in: 200...1000, step: 50)
-                    .tint(.orange)
+                Slider(value: Binding(
+                    get: { Double(profile.calorieGoal) },
+                    set: {
+                        profile.calorieGoal = Int($0)
+                        profile.save()
+                    }
+                ), in: 200...1000, step: 50)
+                .tint(Color.arkoTeal)
 
                 HStack {
                     Text("200")
@@ -82,80 +109,115 @@ struct ProfileView: View {
                         .foregroundStyle(.secondary)
                 }
             }
-            .padding(.vertical, 4)
 
-            Picker("Fitness Level", selection: $fitnessLevel) {
-                ForEach(FitnessLevel.allCases) { level in
-                    Text(level.label).tag(level)
+            Divider()
+
+            HStack {
+                Text("Fitness Level")
+                    .font(.subheadline)
+                Spacer()
+                Picker("", selection: Binding(
+                    get: { profile.fitnessLevel },
+                    set: {
+                        profile.fitnessLevel = $0
+                        profile.save()
+                    }
+                )) {
+                    Text("Beginner").tag("beginner")
+                    Text("Intermediate").tag("intermediate")
+                    Text("Advanced").tag("advanced")
                 }
+                .pickerStyle(.menu)
+                .tint(Color.arkoTeal)
             }
-        } header: {
-            Label("Goals", systemImage: "target")
-                .textCase(nil)
+        }
+        .arkoCard()
+    }
+
+    // MARK: - Settings Card
+
+    private var settingsCard: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Label("Settings", systemImage: "gearshape.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.arkoTeal)
+                .padding(.bottom, 14)
+
+            settingsRow(icon: "bell.fill", color: .orange, title: "Workout Reminders") {
+                Toggle("", isOn: $notificationsEnabled)
+                    .tint(Color.arkoTeal)
+            }
+
+            Divider().padding(.vertical, 8)
+
+            settingsRow(icon: "heart.fill", color: .red, title: "Apple Health") {
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+
+            Divider().padding(.vertical, 8)
+
+            settingsRow(icon: "sparkles", color: Color.arkoTeal, title: "AI Coach Settings") {
+                Image(systemName: "chevron.right")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .arkoCard()
+    }
+
+    private func settingsRow<T: View>(icon: String, color: Color, title: String, @ViewBuilder trailing: () -> T) -> some View {
+        HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 8)
+                    .fill(color.opacity(0.12))
+                    .frame(width: 32, height: 32)
+                Image(systemName: icon)
+                    .font(.system(size: 14))
+                    .foregroundStyle(color)
+            }
+            Text(title)
+                .font(.subheadline)
+            Spacer()
+            trailing()
         }
     }
 
-    // MARK: - Settings
+    // MARK: - About Card
 
-    private var settingsSection: some View {
-        Section {
-            Toggle(isOn: $notificationsEnabled) {
-                Label("Workout Reminders", systemImage: "bell.fill")
-            }
-            .tint(.orange)
+    private var aboutCard: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            Label("About ARKO", systemImage: "info.circle.fill")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Color.arkoTeal)
 
-            NavigationLink {
-                Text("HealthKit settings — coming soon")
-            } label: {
-                Label("Apple Health", systemImage: "heart.fill")
-                    .foregroundStyle(.red)
-            }
-
-            NavigationLink {
-                Text("AI preferences — coming soon")
-            } label: {
-                Label("AI Coach Settings", systemImage: "sparkles")
-                    .foregroundStyle(.orange)
-            }
-        } header: {
-            Label("Settings", systemImage: "gearshape")
-                .textCase(nil)
-        }
-    }
-
-    // MARK: - About
-
-    private var aboutSection: some View {
-        Section {
             HStack {
                 Text("Version")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
                 Spacer()
                 Text("1.0.0")
-                    .foregroundStyle(.secondary)
+                    .font(.subheadline.weight(.medium))
             }
+            Divider()
             HStack {
                 Text("AI Model")
-                Spacer()
-                Text("Claude (claude-sonnet-4-6)")
+                    .font(.subheadline)
                     .foregroundStyle(.secondary)
-                    .font(.caption)
+                Spacer()
+                Text("Llama 3.3 via Groq")
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Color.arkoTeal)
             }
-        } header: {
-            Label("About ARKO", systemImage: "info.circle")
-                .textCase(nil)
-        } footer: {
-            Text("ARKO uses on-device AI for form analysis. Workout recommendations are powered by Claude. Always consult a professional before starting a new fitness routine.")
+
+            Text("ARKO uses on-device AI for form analysis. Always consult a professional before starting a new fitness routine.")
                 .font(.caption2)
+                .foregroundStyle(.secondary)
+                .padding(.top, 4)
         }
+        .arkoCard()
     }
-}
-
-// MARK: - Model
-
-enum FitnessLevel: String, CaseIterable, Identifiable {
-    case beginner, intermediate, advanced
-    var id: String { rawValue }
-    var label: String { rawValue.capitalized }
 }
 
 struct ProfileView_Previews: PreviewProvider {
